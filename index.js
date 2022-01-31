@@ -12,70 +12,82 @@ app.use(cors());
 app.use(express.json());
 
 //conncetion uri
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.unwup.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.unwup.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bttmq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
+// console.log('Server Chalu')
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-//datbase
+//database
 async function run() {
   try {
     await client.connect();
-    const database = client.db("cycleHaat");
+    const database = client.db("cycleShop");
     const ordersCollection = database.collection("orders");
     const usersCollection = database.collection("users");
-    const cycleCollection = database.collection("cycle");
+    const cycleCollection = database.collection("cycles");
     const reviewsCollection = database.collection("reviews");
     const blogsCollection = database.collection("blogs");
+
     //POST Api for addcycle
     app.post("/addCycle", async (req, res) => {
       const addCycle = req.body;
       const result = await cycleCollection.insertOne(addCycle);
       res.send(result.insertedId);
     });
+
     //POST Api for addBlog
     app.post("/addBlog", async (req, res) => {
       const addBlog = req.body;
-
       const result = await blogsCollection.insertOne(addBlog);
       res.send(result.insertedId);
     });
+
     //POST Api for addReview
     app.post("/addReview", async (req, res) => {
       const addReview = req.body;
       const result = await reviewsCollection.insertOne(addReview);
       res.send(result.insertedId);
     });
+
     //GET API for show cycles
     app.get("/cycles", async (req, res) => {
       const result = await cycleCollection.find({}).toArray();
       res.send(result);
     });
+
     //GET API for show cycles on home page
     app.get("/homeCycles", async (req, res) => {
       const result = await cycleCollection.find({}).limit(6).toArray();
       res.send(result);
     });
+
     //GET API for show reviews
     app.get("/reviews", async (req, res) => {
       const result = await reviewsCollection.find({}).toArray();
       res.send(result);
     });
+
     //GET API for show blogs
     app.get("/blogs", async (req, res) => {
       const result = await blogsCollection.find({}).toArray();
       res.send(result);
     });
+
     //booking cycle to database
     app.post("/orders", async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
-      // console.log(order);
-
       res.json(result);
     });
-    //booked order to show user at dashboar
+
+    //booked order to show user at dashboard
     app.get("/orders", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
@@ -83,6 +95,7 @@ async function run() {
       const orders = await cursor.toArray();
       res.json(orders);
     });
+
     //user send to database (reg)
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -91,6 +104,7 @@ async function run() {
       console.log(result);
       res.json(result);
     });
+
     //user send to database (google)
     app.put("/users", async (req, res) => {
       const user = req.body;
@@ -104,6 +118,7 @@ async function run() {
       );
       res.json(result);
     });
+
     //make admin
     app.put("/users/admin", async (req, res) => {
       const user = req.body;
@@ -112,6 +127,7 @@ async function run() {
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
+
     //check admin?
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
@@ -124,6 +140,7 @@ async function run() {
       }
       res.json({ admin: isAdmin });
     });
+
     //delete from  orders
     app.delete("/orders/:id", async (req, res) => {
       const id = req.params.id;
@@ -132,21 +149,30 @@ async function run() {
       res.json(result);
       console.log(result);
     });
+
     ////Get manage orders from order collection
     app.get("/manageOrders", async (req, res) => {
       const result = await ordersCollection.find({}).toArray();
       res.send(result);
     });
-  } finally {
-    // Ensures that the client will close when you finish/error
+  } 
+
+  finally {
+
     // await client.close();
   }
 }
 run().catch(console.dir);
+
 //
 app.get("/", (req, res) => {
   res.send("Hi Cycle haat!");
 });
+
+
+app.get('/hero',(req,res)=>{
+  res.send('Heroku Check')
+})
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
